@@ -20,6 +20,9 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] private float _losePlayerDistance = 15f;
     [SerializeField] private float _killDistance = 1.5f;
 
+    [Header("GameManager")]
+    [SerializeField] private GameManager _gameManager;
+
     private NavMeshAgent _agent;
     private Animator _animator;
     private int _currentWaypoint;
@@ -118,7 +121,7 @@ public class EnemyAI : MonoBehaviour
 
         if (dist <= _killDistance)
         {
-            _player.GetComponent<FirstPersonController>()?.Die();
+            _gameManager.ReportDeath();
             return;
         }
 
