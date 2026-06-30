@@ -4,7 +4,9 @@ public class DiamondSpawner : MonoBehaviour
 {
     [SerializeField] private GameObject prefab;
     [SerializeField] private Transform[] points;
-    [SerializeField] private int count = 20;
+    [SerializeField] private int count = 10;
+
+    public int SpawnedCount => count;
 
     private void Start()
     {

@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(CharacterController))]
 public class FirstPersonController : MonoBehaviour
@@ -19,13 +18,8 @@ public class FirstPersonController : MonoBehaviour
     [SerializeField] private float _minPitch = -85f;
     [SerializeField] private float _maxPitch = 85f;
 
-    [Header("Сбор алмазов")]
-    [SerializeField] private DiamondCounter _diamondCounter;
-    [SerializeField] private AudioClip _diamondPickupClip;
-    [SerializeField] [Range(0f, 1f)] private float _diamondPickupVolume = 0.7f;
-
-    [Header("UI")]
-    [SerializeField] private GameUI _gameUI;
+    [Header("GameManager")]
+    [SerializeField] private GameManager _gameManager;
 
     [Header("Звуки шагов")]
     [SerializeField] private AudioClip[] _footstepClips;
@@ -154,24 +148,8 @@ public class FirstPersonController : MonoBehaviour
         Cursor.visible = !locked;
     }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Diamond"))
-        {
-            _diamondCounter.Increment();
-
-            if (_diamondPickupClip != null)
-                _audioSource.PlayOneShot(_diamondPickupClip, _diamondPickupVolume);
-
-            other.gameObject.SetActive(false);
-        }
-    }
-
     public void Die()
     {
-        if (_gameUI != null)
-            _gameUI.ShowDeath();
-        else
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        _gameManager.ReportDeath();
     }
 }
