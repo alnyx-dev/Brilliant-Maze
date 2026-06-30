@@ -288,7 +288,8 @@ public class MazeGenerator : MonoBehaviour
                     for (int xi = x; xi < x + rw; xi++)
                         used[xi, yi] = true;
 
-                AddWallBlock(wallBuilder, x, y, rw, rh);
+                if (rw > 1 || rh > 1)
+                    AddWallBlock(wallBuilder, x, y, rw, rh);
             }
         }
 

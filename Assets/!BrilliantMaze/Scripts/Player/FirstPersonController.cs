@@ -18,6 +18,9 @@ public class FirstPersonController : MonoBehaviour
     [SerializeField] private float _minPitch = -85f;
     [SerializeField] private float _maxPitch = 85f;
 
+    [Header("Сбор алмазов")]
+    [SerializeField] private DiamondCounter _diamondCounter;
+
     private CharacterController _controller;
     private PlayerControls _controls;
     private Vector3 _velocity;
@@ -92,5 +95,14 @@ public class FirstPersonController : MonoBehaviour
     {
         Cursor.lockState = locked ? CursorLockMode.Locked : CursorLockMode.None;
         Cursor.visible = !locked;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Diamond"))
+        {
+            _diamondCounter.Increment();
+            other.gameObject.SetActive(false);
+        }
     }
 }
