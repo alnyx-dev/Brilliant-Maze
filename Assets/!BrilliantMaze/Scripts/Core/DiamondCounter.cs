@@ -1,22 +1,17 @@
-using TMPro;
 using UnityEngine;
 
 public class DiamondCounter : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI text;
+    [SerializeField] private GameUI _gameUI;
     private int count;
 
-    private void Awake()
-    {
-        if (text == null) text = GetComponent<TextMeshProUGUI>();
-        UpdateText();
-    }
+    public int Count => count;
 
     public void Increment()
     {
         count++;
-        UpdateText();
-    }
 
-    private void UpdateText() => text.text = count.ToString();
+        if (_gameUI != null)
+            _gameUI.UpdateDiamondCount(count);
+    }
 }

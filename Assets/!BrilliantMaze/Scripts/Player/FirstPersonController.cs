@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(CharacterController))]
 public class FirstPersonController : MonoBehaviour
@@ -20,16 +21,32 @@ public class FirstPersonController : MonoBehaviour
 
     [Header("Сбор алмазов")]
     [SerializeField] private DiamondCounter _diamondCounter;
+    [SerializeField] private AudioClip _diamondPickupClip;
+    [SerializeField] [Range(0f, 1f)] private float _diamondPickupVolume = 0.7f;
+
+    [Header("UI")]
+    [SerializeField] private GameUI _gameUI;
+
+    [Header("Звуки шагов")]
+    [SerializeField] private AudioClip[] _footstepClips;
+    [SerializeField] private float _walkStepInterval = 0.5f;
+    [SerializeField] private float _runStepInterval = 0.35f;
+    [SerializeField] [Range(0f, 1f)] private float _footstepVolume = 0.5f;
 
     private CharacterController _controller;
     private PlayerControls _controls;
     private Vector3 _velocity;
     private float _pitch;
+    private AudioSource _audioSource;
+    private float _stepTimer;
+    private int _lastClipIndex = -1;
 
     private void Awake()
     {
         _controller = GetComponent<CharacterController>();
         _controls = new PlayerControls();
+        _audioSource = gameObject.AddComponent<AudioSource>();
+        _audioSource.playOnAwake = false;
 
         if (_playerCamera == null)
             _playerCamera = Camera.main;
@@ -45,8 +62,11 @@ public class FirstPersonController : MonoBehaviour
 
     private void Update()
     {
+        if (Time.timeScale == 0f) return;
+
         HandleLook();
         HandleMovement();
+        HandleFootsteps();
         HandleCursorToggle();
     }
 
@@ -83,6 +103,43 @@ public class FirstPersonController : MonoBehaviour
         _controller.Move(_velocity * Time.deltaTime);
     }
 
+    private void HandleFootsteps()
+    {
+        if (_footstepClips == null || _footstepClips.Length == 0) return;
+
+        Vector2 input = _controls.Player.Move.ReadValue<Vector2>();
+        bool isMoving = input.sqrMagnitude > 0.01f;
+        bool isGrounded = _controller.isGrounded;
+
+        if (!isMoving || !isGrounded)
+        {
+            _stepTimer = 0f;
+            return;
+        }
+
+        bool isRunning = _controls.Player.Sprint.IsPressed();
+        float interval = isRunning ? _runStepInterval : _walkStepInterval;
+
+        _stepTimer += Time.deltaTime;
+        if (_stepTimer >= interval)
+        {
+            _stepTimer = 0f;
+            PlayFootstep();
+        }
+    }
+
+    private void PlayFootstep()
+    {
+        int index;
+        do
+        {
+            index = Random.Range(0, _footstepClips.Length);
+        } while (index == _lastClipIndex && _footstepClips.Length > 1);
+
+        _lastClipIndex = index;
+        _audioSource.PlayOneShot(_footstepClips[index], _footstepVolume);
+    }
+
     private void HandleCursorToggle()
     {
         if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
@@ -102,7 +159,19 @@ public class FirstPersonController : MonoBehaviour
         if (other.CompareTag("Diamond"))
         {
             _diamondCounter.Increment();
+
+            if (_diamondPickupClip != null)
+                _audioSource.PlayOneShot(_diamondPickupClip, _diamondPickupVolume);
+
             other.gameObject.SetActive(false);
         }
+    }
+
+    public void Die()
+    {
+        if (_gameUI != null)
+            _gameUI.ShowDeath();
+        else
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

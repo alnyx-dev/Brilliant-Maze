@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Diamond : MonoBehaviour
+public class Rotate : MonoBehaviour
 {
     [Header("Rotation")]
     [SerializeField] private Vector3 rotationAxis = new Vector3(0f, 1f, 0f);
